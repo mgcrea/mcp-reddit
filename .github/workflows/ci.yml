@@ -1,0 +1,157 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*.*.*"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  test:
+    name: Test on node@${{ matrix.node }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: ["lts/*"]
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v5
+      - name: Setup pnpm 🔧
+        uses: pnpm/action-setup@v6
+      - name: Setup node 🔧
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node }}
+          check-latest: true
+          cache: "pnpm"
+      - name: Install 🪄
+        run: pnpm install --frozen-lockfile
+      - name: Lint 🔍
+        run: pnpm run lint
+      - name: Format 🔍
+        run: pnpm run format:check
+      - name: TypeScript 🔍
+        run: pnpm run typecheck
+      - name: Test 🧪
+        run: pnpm run test
+      - name: Build 📦
+        run: pnpm run build
+      # The tool list is the server's public contract, and it is easy to change
+      # by accident. This asserts the built CLI still speaks MCP over stdio, and
+      # that each capability tier is gated by non-registration rather than by a
+      # refusal an agent could try to argue with.
+      - name: MCP smoke test 🧪
+        run: |
+          probe() {
+            printf '%s\n' \
+              '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"ci","version":"0"}}}' \
+              '{"jsonrpc":"2.0","method":"notifications/initialized"}' \
+              '{"jsonrpc":"2.0","id":2,"method":"tools/list"}' \
+            | env "$@" REDDIT_TOKEN_PATH=/nonexistent/tokens.json node dist/cli.js 2>/dev/null | tail -1
+          }
+
+          # 1. With nothing configured the server must still come up. A server
+          #    that exits here shows in the client as a bare "Connection closed"
+          #    with stderr swallowed, and the setup guide never reaches anyone.
+          probe FOO=1 > /tmp/bare.json
+          grep -q 'reddit_auth_status' /tmp/bare.json || { echo "server did not serve the auth tools with no config"; exit 1; }
+          ! grep -q 'reddit_list_posts' /tmp/bare.json || { echo "browse tools leaked without a client id"; exit 1; }
+
+          # 2. A client id alone unlocks anonymous public reads.
+          probe REDDIT_CLIENT_ID=ci-fake > /tmp/anon.json
+          grep -q 'reddit_list_posts' /tmp/anon.json || { echo "browse tools missing with a client id"; exit 1; }
+          ! grep -q 'reddit_get_saved' /tmp/anon.json || { echo "account tools leaked without a login"; exit 1; }
+
+          # 3. The write flag must stay inert without a login — the negative half
+          #    of the promise, and the one a unit test can miss if a tool is added
+          #    outside its gate.
+          probe REDDIT_CLIENT_ID=ci-fake REDDIT_ALLOW_WRITES=1 > /tmp/writes.json
+          for tool in reddit_submit_post reddit_reply reddit_vote reddit_delete reddit_send_message; do
+            ! grep -q "\"$tool\"" /tmp/writes.json || { echo "$tool leaked without a login"; exit 1; }
+          done
+
+      # The HTTP entrypoint must bind loopback only. Two sibling servers in this
+      # fleet call listen(PORT) with no host, which binds every interface while
+      # logging "localhost" — this fails the build rather than trusting the code.
+      - name: HTTP binds loopback only 🔒
+        run: |
+          REDDIT_CLIENT_ID=ci-fake REDDIT_HTTP_PORT=8799 \
+            REDDIT_TOKEN_PATH=/nonexistent/tokens.json node dist/http.js & pid=$!
+          for _ in $(seq 1 40); do
+            curl -sf -o /dev/null "http://127.0.0.1:8799/.well-known/oauth-authorization-server" && break
+            sleep 0.25
+          done
+          ss -ltnp 2>/dev/null | grep ':8799' || true
+          if ss -ltn 2>/dev/null | grep -qE '(0\.0\.0\.0|\*|\[::\]):8799'; then
+            echo "HTTP server is bound to every interface"; kill $pid; exit 1
+          fi
+          # An unauthenticated request must be a 401 carrying the discovery
+          # pointer — that 401 is what makes the Authenticate button appear.
+          code=$(curl -s -o /tmp/h -D /tmp/hdr -w '%{http_code}' -X POST "http://127.0.0.1:8799/mcp" -d '{}')
+          test "$code" = "401" || { echo "expected 401, got $code"; kill $pid; exit 1; }
+          grep -qi 'resource_metadata=' /tmp/hdr || { echo "401 is missing the resource_metadata pointer"; kill $pid; exit 1; }
+          kill $pid
+
+  publish-npm:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+    needs: test
+    if: startsWith(github.ref, 'refs/tags/v')
+    # id-token: write is required for OIDC trusted publishing + provenance
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v5
+      - name: Setup pnpm 🔧
+        uses: pnpm/action-setup@v6
+      - name: Setup node 🔧
+        uses: actions/setup-node@v6
+        with:
+          node-version: lts/*
+          cache: "pnpm"
+          registry-url: https://registry.npmjs.org
+      - name: Install 🪄
+        run: pnpm install --frozen-lockfile
+      - name: Upgrade npm 🔧
+        # OIDC trusted publishing needs a recent npm CLI
+        run: npm install -g npm@latest
+      # A version already on npm cannot be republished, so re-running this job
+      # would fail on a duplicate. Skip instead, so pushing a tag is always safe.
+      - name: Check npm for this version 🔍
+        id: published
+        run: |
+          name=$(node -p "require('./package.json').name")
+          version=$(node -p "require('./package.json').version")
+          if npm view "$name@$version" version >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::$name@$version is already published — skipping publish."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Publish 🚀
+        if: steps.published.outputs.exists == 'false'
+        run: npm publish --provenance --access public
+
+  github-release:
+    name: GitHub Release
+    runs-on: ubuntu-latest
+    needs: test
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v5
+      - name: Create release 🏷️
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.ref_name }}
+          generate_release_notes: true

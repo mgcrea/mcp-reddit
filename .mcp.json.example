@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "reddit": {
+      "command": "node",
+      "args": ["/absolute/path/to/mcp-reddit/dist/cli.js"],
+      "env": {
+        "REDDIT_CLIENT_ID": "...",
+        "REDDIT_USER_AGENT": "macos:mcp-reddit:0.1.0 (by /u/yourname)",
+        "REDDIT_ALLOW_WRITES": ""
+      }
+    }
+  }
+}
