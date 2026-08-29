@@ -18,7 +18,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: ["lts/*"]
+        # 22 is here because engines.node says ">=22". An untested floor is a
+        # guess, and the Dockerfile/runtime is node 24, so nothing else covers it.
+        node: ["22", "lts/*"]
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@v5
