@@ -29,6 +29,7 @@ export const registerBrowseTools = (
   server.registerTool(
     "reddit_list_posts",
     {
+      title: "Reddit: List Posts",
       description:
         "List posts from a subreddit, or from the site-wide front page when `subreddit` is " +
         "omitted. Returns each post's id, title, author, score, comment count and permalink — " +
@@ -59,6 +60,7 @@ export const registerBrowseTools = (
   server.registerTool(
     "reddit_get_subreddit",
     {
+      title: "Reddit: Get Subreddit",
       description:
         "Get one subreddit's description, subscriber count and current active users. Useful " +
         "before listing posts, to confirm the name is right and the community is the one you " +
@@ -77,6 +79,7 @@ export const registerBrowseTools = (
   server.registerTool(
     "reddit_search",
     {
+      title: "Reddit: Search",
       description:
         "Search Reddit. Scoped to one subreddit when `subreddit` is given, site-wide " +
         "otherwise. Reddit's index is weaker than a web search engine's: prefer a few " +
@@ -123,6 +126,7 @@ export const registerBrowseTools = (
   server.registerTool(
     "reddit_get_post",
     {
+      title: "Reddit: Get Post",
       description:
         "Get one post together with its comment thread, flattened to a depth-tagged list. " +
         "Comment trees are the largest thing this API returns, so `maxComments` and `maxDepth` " +
@@ -177,6 +181,7 @@ export const registerBrowseTools = (
   server.registerTool(
     "reddit_get_more_comments",
     {
+      title: "Reddit: Get More Comments",
       description:
         "Expand the reply stubs reddit_get_post reported under `unexpanded`. Pass the post id " +
         "and the ids from one stub. This is the only way to reach a deep thread's tail — " +

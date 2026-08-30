@@ -30,6 +30,7 @@ export const registerAuthTools = (server: McpServer, ctx: ToolContext): void => 
   server.registerTool(
     "reddit_auth_status",
     {
+      title: "Reddit: Auth Status",
       description:
         "Report what credentials this server has, which tools are therefore available, and — " +
         "when something is missing — exactly what to set or run to fix it. Call this first " +
@@ -53,6 +54,7 @@ export const registerAuthTools = (server: McpServer, ctx: ToolContext): void => 
   server.registerTool(
     "reddit_auth_login",
     {
+      title: "Reddit: Auth Login",
       description:
         "Sign in to Reddit in a browser. Opens Reddit's consent page, catches the callback on " +
         "a loopback port and stores a refresh token, so this is a one-time step. Needed for " +
@@ -91,6 +93,7 @@ export const registerAuthTools = (server: McpServer, ctx: ToolContext): void => 
   server.registerTool(
     "reddit_auth_logout",
     {
+      title: "Reddit: Auth Logout",
       description:
         "Forget the stored Reddit refresh token. Anonymous browsing keeps working; the " +
         "account-scoped tools stop. This does not revoke the app on Reddit's side — do that " +
@@ -110,6 +113,7 @@ export const registerAuthTools = (server: McpServer, ctx: ToolContext): void => 
   server.registerTool(
     "reddit_auth_url",
     {
+      title: "Reddit: Auth URL",
       description:
         "Build the Reddit consent URL without starting the loopback listener. Use this when " +
         "the browser is on a different machine than the server, or to check which scopes a " +

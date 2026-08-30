@@ -13,6 +13,7 @@ export const registerUserTools = (
   server.registerTool(
     "reddit_get_user",
     {
+      title: "Reddit: Get User",
       description:
         "Get a Reddit account's karma, age and flags. Works for any public account without a " +
         "login. Suspended and shadowbanned accounts return 404, not an empty profile.",
@@ -29,6 +30,7 @@ export const registerUserTools = (
   server.registerTool(
     "reddit_list_user_posts",
     {
+      title: "Reddit: List User Posts",
       description:
         "List the posts an account has submitted, newest first by default. Reddit only serves " +
         "roughly the last 1000 items of any user listing however far you paginate, so this " +
@@ -53,6 +55,7 @@ export const registerUserTools = (
   server.registerTool(
     "reddit_list_user_comments",
     {
+      title: "Reddit: List User Comments",
       description:
         "List the comments an account has written. Same ~1000-item ceiling as " +
         "reddit_list_user_posts. Each comment carries its parent id, so you can follow one " +

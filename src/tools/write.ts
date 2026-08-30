@@ -30,6 +30,7 @@ export const registerWriteTools = (
   server.registerTool(
     "reddit_submit_post",
     {
+      title: "Reddit: Submit Post",
       description:
         "Submit a new post to a subreddit — either a self (text) post or a link. Most " +
         "subreddits enforce rules a bot cannot see: flair requirements, minimum account age, " +
@@ -86,6 +87,7 @@ export const registerWriteTools = (
   server.registerTool(
     "reddit_reply",
     {
+      title: "Reddit: Reply",
       description:
         "Reply to a post or a comment. The parent is a fullname: `t3_…` replies at top level " +
         "on a post, `t1_…` replies to a specific comment. Replying to a locked or archived " +
@@ -115,6 +117,7 @@ export const registerWriteTools = (
   server.registerTool(
     "reddit_vote",
     {
+      title: "Reddit: Vote",
       description:
         "Upvote, downvote or clear your vote on a post or comment. Reddit's API terms forbid " +
         "automated voting that is not a deliberate human choice, and vote manipulation is a " +
@@ -140,6 +143,7 @@ export const registerWriteTools = (
   server.registerTool(
     "reddit_save",
     {
+      title: "Reddit: Save",
       description:
         "Save or unsave a post or comment to the signed-in account's saved list. Reads back " +
         "through reddit_get_saved.",
@@ -159,6 +163,7 @@ export const registerWriteTools = (
   server.registerTool(
     "reddit_subscribe",
     {
+      title: "Reddit: Subscribe",
       description:
         "Subscribe to or leave a subreddit. Changes what the signed-in account's front page " +
         "shows.",
@@ -181,6 +186,7 @@ export const registerWriteTools = (
   server.registerTool(
     "reddit_send_message",
     {
+      title: "Reddit: Send Message",
       description:
         "Send a private message to a Reddit user. Unsolicited messages are the fastest way to " +
         "get an account suspended, so send these only when a person asked for one. Reddit " +
@@ -203,6 +209,7 @@ export const registerWriteTools = (
   server.registerTool(
     "reddit_delete",
     {
+      title: "Reddit: Delete",
       description:
         "Delete one of your own posts or comments. Irreversible: Reddit keeps no undo, the id " +
         "cannot be reused, and third-party mirrors will still hold a copy. A deleted comment " +
@@ -220,6 +227,7 @@ export const registerWriteTools = (
   server.registerTool(
     "reddit_edit",
     {
+      title: "Reddit: Edit",
       description:
         "Edit the body of one of your own self posts or comments. Reddit marks the item as " +
         "edited and shows the timestamp; the original text is not recoverable through the API. " +

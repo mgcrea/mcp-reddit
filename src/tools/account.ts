@@ -19,6 +19,7 @@ export const registerAccountTools = (
   server.registerTool(
     "reddit_get_me",
     {
+      title: "Reddit: Get Me",
       description:
         "Get the signed-in account: username, karma and account age. Use it to confirm which " +
         "account this server is acting as before writing anything.",
@@ -37,6 +38,7 @@ export const registerAccountTools = (
   server.registerTool(
     "reddit_list_subscriptions",
     {
+      title: "Reddit: List Subscriptions",
       description:
         "List the subreddits the signed-in account subscribes to. This is the cheapest way to " +
         "answer 'what do I follow' — reading the front page tells you what is popular there " +
@@ -55,6 +57,7 @@ export const registerAccountTools = (
   server.registerTool(
     "reddit_get_saved",
     {
+      title: "Reddit: Get Saved",
       description:
         "List the posts and comments the signed-in account has saved. The listing mixes both " +
         "kinds — each item's id prefix tells you which (`t3_` post, `t1_` comment).",
@@ -84,6 +87,7 @@ export const registerAccountTools = (
   server.registerTool(
     "reddit_get_inbox",
     {
+      title: "Reddit: Get Inbox",
       description:
         "Read the signed-in account's inbox — private messages, comment replies and username " +
         "mentions. Reading here does not mark anything read on Reddit.",

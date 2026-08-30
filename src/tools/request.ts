@@ -32,6 +32,7 @@ export const registerRequestTool = (
   server.registerTool(
     "reddit_request",
     {
+      title: "Reddit: Request",
       description:
         "Call any Reddit API endpoint directly, for the many endpoints this server does not " +
         "wrap. Paths are relative to https://oauth.reddit.com — e.g. `/r/rust/about/rules`. " +
@@ -85,6 +86,7 @@ export const registerRequestTool = (
   server.registerTool(
     "reddit_rate_limit_status",
     {
+      title: "Reddit: Rate Limit Status",
       description:
         "Report what Reddit has said about your remaining budget on each endpoint used so " +
         "far this session. Reddit allows roughly 100 requests per minute per OAuth client; " +
