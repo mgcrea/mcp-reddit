@@ -55,6 +55,14 @@ export const statesMatch = (a: string, b: string): boolean => {
   return left.length === right.length && timingSafeEqual(left, right);
 };
 
+/**
+ * Verify a PKCE `code_verifier` against the `code_challenge` recorded at
+ * /authorize (S256 only — `plain` is not accepted). Constant-time, because a
+ * verifier that can be probed byte by byte is not a verifier.
+ */
+export const verifyPkceS256 = (verifier: string, challenge: string): boolean =>
+  statesMatch(base64url(createHash("sha256").update(verifier).digest()), challenge);
+
 export const exchangeCode = async (
   config: Config,
   code: string,

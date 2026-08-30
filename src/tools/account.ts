@@ -1,4 +1,4 @@
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import type { McpServer } from "@modelcontextprotocol/server";
 import { z } from "zod";
 
 import type { RedditClient } from "#/client/reddit";
@@ -23,7 +23,7 @@ export const registerAccountTools = (
       description:
         "Get the signed-in account: username, karma and account age. Use it to confirm which " +
         "account this server is acting as before writing anything.",
-      inputSchema: {},
+      inputSchema: z.object({}),
       annotations: { readOnlyHint: true },
     },
     async () =>
@@ -43,7 +43,7 @@ export const registerAccountTools = (
         "List the subreddits the signed-in account subscribes to. This is the cheapest way to " +
         "answer 'what do I follow' — reading the front page tells you what is popular there " +
         "today, not what you subscribed to.",
-      inputSchema: { limit: limitArg, after: afterArg },
+      inputSchema: z.object({ limit: limitArg, after: afterArg }),
       annotations: { readOnlyHint: true },
     },
     async ({ limit, after }) =>
@@ -61,14 +61,14 @@ export const registerAccountTools = (
       description:
         "List the posts and comments the signed-in account has saved. The listing mixes both " +
         "kinds — each item's id prefix tells you which (`t3_` post, `t1_` comment).",
-      inputSchema: {
+      inputSchema: z.object({
         limit: limitArg,
         after: afterArg,
         type: z
           .enum(["all", "links", "comments"])
           .default("all")
           .describe("Restrict to saved posts or saved comments. Defaults to both."),
-      },
+      }),
       annotations: { readOnlyHint: true },
     },
     async ({ limit, after, type }) =>
@@ -91,14 +91,14 @@ export const registerAccountTools = (
       description:
         "Read the signed-in account's inbox — private messages, comment replies and username " +
         "mentions. Reading here does not mark anything read on Reddit.",
-      inputSchema: {
+      inputSchema: z.object({
         box: z
           .enum(["inbox", "unread", "messages", "comments", "mentions"])
           .default("inbox")
           .describe("Which inbox view. `inbox` is everything; `unread` is only what is new."),
         limit: limitArg,
         after: afterArg,
-      },
+      }),
       annotations: { readOnlyHint: true },
     },
     async ({ box, limit, after }) =>

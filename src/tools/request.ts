@@ -1,4 +1,4 @@
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import type { McpServer } from "@modelcontextprotocol/server";
 import { z } from "zod";
 
 import { WritesDisabledError } from "#/client/errors";
@@ -43,7 +43,7 @@ export const registerRequestTool = (
             "check the path before you call it."
           : "Writes are DISABLED: only GET is permitted. Set REDDIT_ALLOW_WRITES=1 and sign in " +
             "to allow POST."),
-      inputSchema: {
+      inputSchema: z.object({
         method: z.enum(methods).default("GET").describe("HTTP method."),
         path: z
           .string()
@@ -64,7 +64,7 @@ export const registerRequestTool = (
             "Send with the signed-in user's token rather than the anonymous app token. " +
               "Required for anything under /api/v1/me, /message or /subreddits/mine.",
           ),
-      },
+      }),
       annotations: { readOnlyHint: !allowWrites, destructiveHint: allowWrites },
     },
     async ({ method, path, query, form, asUser }) =>
@@ -91,7 +91,7 @@ export const registerRequestTool = (
         "Report what Reddit has said about your remaining budget on each endpoint used so " +
         "far this session. Reddit allows roughly 100 requests per minute per OAuth client; " +
         "check here before a large paginated read rather than after a 429.",
-      inputSchema: {},
+      inputSchema: z.object({}),
       annotations: { readOnlyHint: true },
     },
     async () =>

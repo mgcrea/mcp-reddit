@@ -1,6 +1,6 @@
 import { execFile } from "node:child_process";
 
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import type { McpServer } from "@modelcontextprotocol/server";
 import { z } from "zod";
 
 import { buildAuthorizeUrl, createPkcePair, runLoopbackLogin } from "#/client/oauth";
@@ -36,7 +36,7 @@ export const registerAuthTools = (server: McpServer, ctx: ToolContext): void => 
         "when something is missing — exactly what to set or run to fix it. Call this first " +
         "whenever a tool you expected is not there: an absent tool usually means a missing " +
         "scope or login rather than a bug.",
-      inputSchema: {},
+      inputSchema: z.object({}),
       annotations: { readOnlyHint: true },
     },
     async () =>
@@ -60,7 +60,7 @@ export const registerAuthTools = (server: McpServer, ctx: ToolContext): void => 
         "a loopback port and stores a refresh token, so this is a one-time step. Needed for " +
         "your subscriptions, saved posts and inbox, and for anything that writes — public " +
         "browsing and search already work without it.",
-      inputSchema: {
+      inputSchema: z.object({
         open: z
           .boolean()
           .default(true)
@@ -68,7 +68,7 @@ export const registerAuthTools = (server: McpServer, ctx: ToolContext): void => 
             "Open the browser automatically. Set false on a headless machine and use the " +
               "returned `authorize_url` yourself.",
           ),
-      },
+      }),
       // Not readOnly (it opens a browser and writes a token file), but deliberately
       // NOT gated behind allowWrites: logging in changes nothing on Reddit, and
       // gating it would leave a read-only install unable to see its own account.
@@ -98,7 +98,7 @@ export const registerAuthTools = (server: McpServer, ctx: ToolContext): void => 
         "Forget the stored Reddit refresh token. Anonymous browsing keeps working; the " +
         "account-scoped tools stop. This does not revoke the app on Reddit's side — do that " +
         "at https://www.reddit.com/prefs/apps.",
-      inputSchema: {},
+      inputSchema: z.object({}),
       annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true },
     },
     async () =>
@@ -118,7 +118,7 @@ export const registerAuthTools = (server: McpServer, ctx: ToolContext): void => 
         "Build the Reddit consent URL without starting the loopback listener. Use this when " +
         "the browser is on a different machine than the server, or to check which scopes a " +
         "login would request before running reddit_auth_login.",
-      inputSchema: {},
+      inputSchema: z.object({}),
       annotations: { readOnlyHint: true },
     },
     async () =>

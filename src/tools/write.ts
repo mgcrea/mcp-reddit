@@ -1,4 +1,4 @@
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import type { McpServer } from "@modelcontextprotocol/server";
 import { z } from "zod";
 
 import type { RedditClient } from "#/client/reddit";
@@ -37,7 +37,7 @@ export const registerWriteTools = (
         "karma thresholds. A rejection comes back as a Reddit error naming the rule, not as a " +
         "silent failure. Reddit also rate-limits new accounts to roughly one post every ten " +
         "minutes.",
-      inputSchema: {
+      inputSchema: z.object({
         subreddit: subredditArg,
         title: z
           .string()
@@ -55,7 +55,7 @@ export const registerWriteTools = (
           .describe("Flair template id, where the subreddit requires one."),
         nsfw: z.boolean().default(false).describe("Mark the post NSFW."),
         confirm: confirmArg,
-      },
+      }),
       annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false },
     },
     async ({ subreddit, title, text, url, flairId, nsfw }) =>
@@ -92,11 +92,11 @@ export const registerWriteTools = (
         "Reply to a post or a comment. The parent is a fullname: `t3_…` replies at top level " +
         "on a post, `t1_…` replies to a specific comment. Replying to a locked or archived " +
         "thread fails — Reddit archives posts after six months.",
-      inputSchema: {
+      inputSchema: z.object({
         parentId: thingIdArg,
         text: z.string().min(1).describe("Markdown body of the reply."),
         confirm: confirmArg,
-      },
+      }),
       annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false },
     },
     async ({ parentId, text }) =>
@@ -123,13 +123,13 @@ export const registerWriteTools = (
         "automated voting that is not a deliberate human choice, and vote manipulation is a " +
         "bannable offence — use this to record a decision someone made, never to sweep a " +
         "listing.",
-      inputSchema: {
+      inputSchema: z.object({
         thingId: thingIdArg,
         direction: z
           .enum(["up", "down", "clear"])
           .describe("`up` = +1, `down` = -1, `clear` removes an existing vote."),
         confirm: confirmArg,
-      },
+      }),
       annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true },
     },
     async ({ thingId, direction }) =>
@@ -147,10 +147,10 @@ export const registerWriteTools = (
       description:
         "Save or unsave a post or comment to the signed-in account's saved list. Reads back " +
         "through reddit_get_saved.",
-      inputSchema: {
+      inputSchema: z.object({
         thingId: thingIdArg,
         saved: z.boolean().default(true).describe("True to save, false to unsave."),
-      },
+      }),
       annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true },
     },
     async ({ thingId, saved }) =>
@@ -167,10 +167,10 @@ export const registerWriteTools = (
       description:
         "Subscribe to or leave a subreddit. Changes what the signed-in account's front page " +
         "shows.",
-      inputSchema: {
+      inputSchema: z.object({
         subreddit: subredditArg,
         subscribe: z.boolean().default(true).describe("True to join, false to leave."),
-      },
+      }),
       annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true },
     },
     async ({ subreddit, subscribe }) =>
@@ -191,12 +191,12 @@ export const registerWriteTools = (
         "Send a private message to a Reddit user. Unsolicited messages are the fastest way to " +
         "get an account suspended, so send these only when a person asked for one. Reddit " +
         "throttles new or low-karma accounts here hard.",
-      inputSchema: {
+      inputSchema: z.object({
         to: usernameArg,
         subject: z.string().min(1).max(100).describe("Subject line, up to 100 characters."),
         text: z.string().min(1).describe("Markdown body of the message."),
         confirm: confirmArg,
-      },
+      }),
       annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false },
     },
     async ({ to, subject, text }) =>
@@ -214,7 +214,7 @@ export const registerWriteTools = (
         "Delete one of your own posts or comments. Irreversible: Reddit keeps no undo, the id " +
         "cannot be reused, and third-party mirrors will still hold a copy. A deleted comment " +
         "leaves a `[deleted]` stub in the thread rather than vanishing.",
-      inputSchema: { thingId: thingIdArg, confirm: confirmArg },
+      inputSchema: z.object({ thingId: thingIdArg, confirm: confirmArg }),
       annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true },
     },
     async ({ thingId }) =>
@@ -232,11 +232,11 @@ export const registerWriteTools = (
         "Edit the body of one of your own self posts or comments. Reddit marks the item as " +
         "edited and shows the timestamp; the original text is not recoverable through the API. " +
         "Link posts cannot have their URL changed — only self posts and comments are editable.",
-      inputSchema: {
+      inputSchema: z.object({
         thingId: thingIdArg,
         text: z.string().min(1).describe("The new markdown body, replacing the old one entirely."),
         confirm: confirmArg,
-      },
+      }),
       annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true },
     },
     async ({ thingId, text }) =>

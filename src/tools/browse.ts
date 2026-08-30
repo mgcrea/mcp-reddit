@@ -1,4 +1,4 @@
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import type { McpServer } from "@modelcontextprotocol/server";
 import { z } from "zod";
 
 import type { RedditClient } from "#/client/reddit";
@@ -36,13 +36,13 @@ export const registerBrowseTools = (
         "the body text or link, but never the comments. Use reddit_get_post for one thread's " +
         "discussion; fetching 25 posts' comment trees is orders of magnitude more text than " +
         "this.",
-      inputSchema: {
+      inputSchema: z.object({
         subreddit: subredditArg.optional(),
         sort: sortArg,
         time: timeArg,
         limit: limitArg,
         after: afterArg,
-      },
+      }),
       annotations: { readOnlyHint: true },
     },
     async ({ subreddit, sort, time, limit, after }) =>
@@ -65,7 +65,7 @@ export const registerBrowseTools = (
         "Get one subreddit's description, subscriber count and current active users. Useful " +
         "before listing posts, to confirm the name is right and the community is the one you " +
         "meant — Reddit returns 404 for both a misspelling and a banned subreddit.",
-      inputSchema: { subreddit: subredditArg },
+      inputSchema: z.object({ subreddit: subredditArg }),
       annotations: { readOnlyHint: true },
     },
     async ({ subreddit }) =>
@@ -85,7 +85,7 @@ export const registerBrowseTools = (
         "otherwise. Reddit's index is weaker than a web search engine's: prefer a few " +
         "distinctive words over a natural-language question, and note that `sort=relevance` " +
         "over `time=all` is usually better than `new` for finding the canonical thread.",
-      inputSchema: {
+      inputSchema: z.object({
         query: z
           .string()
           .min(1)
@@ -100,7 +100,7 @@ export const registerBrowseTools = (
         time: timeArg,
         limit: limitArg,
         after: afterArg,
-      },
+      }),
       annotations: { readOnlyHint: true },
     },
     async ({ query, subreddit, sort, time, limit, after }) =>
@@ -133,7 +133,7 @@ export const registerBrowseTools = (
         "are deliberately low: raise them when you actually need the long tail. Replies that " +
         "were not expanded are reported under `unexpanded` with their ids, so nothing is " +
         "dropped silently — pass those ids to reddit_get_more_comments.",
-      inputSchema: {
+      inputSchema: z.object({
         postId: postIdArg,
         sort: z
           .enum(["confidence", "top", "new", "controversial", "old", "qa"])
@@ -153,7 +153,7 @@ export const registerBrowseTools = (
           .max(10)
           .default(3)
           .describe("How deep to walk reply chains (0-10). Defaults to 3."),
-      },
+      }),
       annotations: { readOnlyHint: true },
     },
     async ({ postId, sort, maxComments, maxDepth }) =>
@@ -187,14 +187,14 @@ export const registerBrowseTools = (
         "and the ids from one stub. This is the only way to reach a deep thread's tail — " +
         "re-fetching the post with a bigger maxDepth walks the same top-level branches again " +
         "rather than continuing where it stopped.",
-      inputSchema: {
+      inputSchema: z.object({
         postId: postIdArg,
         commentIds: z
           .array(z.string().min(1))
           .min(1)
           .max(100)
           .describe("Comment ids from an `unexpanded[].ids` array, up to 100 per call."),
-      },
+      }),
       annotations: { readOnlyHint: true },
     },
     async ({ postId, commentIds }) =>

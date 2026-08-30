@@ -2,12 +2,14 @@ import { mkdtempSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
+import { OAuthError, OAuthErrorCode } from "@modelcontextprotocol/server";
 import { describe, expect, it, vi } from "vitest";
 
 import { basicAuth, createTokenProvider } from "#/client/auth";
-import { buildAuthorizeUrl, createPkcePair, statesMatch } from "#/client/oauth";
+import { buildAuthorizeUrl, createPkcePair, statesMatch, verifyPkceS256 } from "#/client/oauth";
 import { fileTokenStore, memoryTokenStore, TOKEN_FILE_VERSION } from "#/client/tokens";
 import { loadConfig } from "#/config";
+import { RedditOAuthProvider } from "#/oauth-provider";
 
 const base = { REDDIT_TOKEN_PATH: "/nonexistent/tokens.json", REDDIT_CLIENT_ID: "cid" };
 
@@ -214,5 +216,51 @@ describe("file token store", () => {
 
   it("clear() is a no-op when nothing was stored", () => {
     expect(() => fileTokenStore("/nonexistent/tokens.json").clear()).not.toThrow();
+  });
+});
+
+describe("RedditOAuthProvider token verification", () => {
+  const provider = (): RedditOAuthProvider =>
+    new RedditOAuthProvider({
+      config: loadConfig({ ...base, REDDIT_HTTP_PORT: "8725" }),
+      store: memoryTokenStore(),
+      issuer: new URL("http://127.0.0.1:8725"),
+    });
+
+  /**
+   * The bearer-auth helpers classify whatever the verifier throws: an
+   * OAuthError(InvalidToken) becomes 401 with a WWW-Authenticate challenge,
+   * while anything unrecognized falls through as unexpected and becomes a 500.
+   * This server shipped bare `Error`s for a while, so an invalid token told the
+   * client the server was broken rather than that it should re-authenticate.
+   */
+  it("rejects an unknown access token as invalid_token, not a bare Error", async () => {
+    await expect(provider().verifyAccessToken("nope")).rejects.toThrow(OAuthError);
+    await expect(provider().verifyAccessToken("nope")).rejects.toMatchObject({
+      code: OAuthErrorCode.InvalidToken,
+    });
+  });
+
+  it("rejects an unknown authorization code and refresh token as invalid_grant", async () => {
+    const p = provider();
+    const client = p.clientsStore.registerClient({
+      redirect_uris: ["http://127.0.0.1:9876/cb"],
+    } as Parameters<typeof p.clientsStore.registerClient>[0]);
+
+    await expect(p.exchangeAuthorizationCode(client, "nope")).rejects.toMatchObject({
+      code: OAuthErrorCode.InvalidGrant,
+    });
+    await expect(p.exchangeRefreshToken(client, "nope")).rejects.toMatchObject({
+      code: OAuthErrorCode.InvalidGrant,
+    });
+  });
+});
+
+describe("PKCE verification", () => {
+  it("accepts the matching verifier and rejects everything else", () => {
+    const { verifier, challenge } = createPkcePair();
+    expect(verifyPkceS256(verifier, challenge)).toBe(true);
+    expect(verifyPkceS256("wrong", challenge)).toBe(false);
+    expect(verifyPkceS256(verifier, "wrong")).toBe(false);
   });
 });

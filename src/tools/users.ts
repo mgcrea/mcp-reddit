@@ -1,4 +1,5 @@
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import type { McpServer } from "@modelcontextprotocol/server";
+import { z } from "zod";
 
 import type { RedditClient } from "#/client/reddit";
 import { isRecord, summarizeAccount, summarizeListing } from "#/client/shape";
@@ -17,7 +18,7 @@ export const registerUserTools = (
       description:
         "Get a Reddit account's karma, age and flags. Works for any public account without a " +
         "login. Suspended and shadowbanned accounts return 404, not an empty profile.",
-      inputSchema: { username: usernameArg },
+      inputSchema: z.object({ username: usernameArg }),
       annotations: { readOnlyHint: true },
     },
     async ({ username }) =>
@@ -35,13 +36,13 @@ export const registerUserTools = (
         "List the posts an account has submitted, newest first by default. Reddit only serves " +
         "roughly the last 1000 items of any user listing however far you paginate, so this " +
         "cannot reconstruct a full history for a prolific account.",
-      inputSchema: {
+      inputSchema: z.object({
         username: usernameArg,
         sort: sortArg,
         time: timeArg,
         limit: limitArg,
         after: afterArg,
-      },
+      }),
       annotations: { readOnlyHint: true },
     },
     async ({ username, sort, time, limit, after }) =>
@@ -60,13 +61,13 @@ export const registerUserTools = (
         "List the comments an account has written. Same ~1000-item ceiling as " +
         "reddit_list_user_posts. Each comment carries its parent id, so you can follow one " +
         "back to its thread with reddit_get_post.",
-      inputSchema: {
+      inputSchema: z.object({
         username: usernameArg,
         sort: sortArg,
         time: timeArg,
         limit: limitArg,
         after: afterArg,
-      },
+      }),
       annotations: { readOnlyHint: true },
     },
     async ({ username, sort, time, limit, after }) =>

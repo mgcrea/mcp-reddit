@@ -1,16 +1,13 @@
 import { randomBytes } from "node:crypto";
 
-import type { OAuthRegisteredClientsStore } from "@modelcontextprotocol/sdk/server/auth/clients.js";
-import type {
-  AuthorizationParams,
-  OAuthServerProvider,
-} from "@modelcontextprotocol/sdk/server/auth/provider.js";
-import type { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
-import type {
-  OAuthClientInformationFull,
-  OAuthTokens,
-} from "@modelcontextprotocol/sdk/shared/auth.js";
-import type { Response } from "express";
+import {
+  OAuthError,
+  OAuthErrorCode,
+  type AuthInfo,
+  type OAuthClientInformationFull,
+  type OAuthClientMetadata,
+  type OAuthTokens,
+} from "@modelcontextprotocol/server";
 
 import type { Logger } from "#/client/auth";
 import { postToken } from "#/client/auth";
@@ -42,6 +39,24 @@ const opaque = (): string => randomBytes(32).toString("base64url");
 
 /** How long an authorization code stays usable. OAuth 2.1 says ten minutes at most. */
 const CODE_TTL_MS = 10 * 60 * 1000;
+
+/**
+ * The authorization-server half of the SDK lives only in the frozen
+ * `@modelcontextprotocol/server-legacy`, and its router is express-shaped. This
+ * server serves it from Hono instead, so the two shapes it needs are declared
+ * here — they are the subset of the v1 interfaces this provider ever used.
+ */
+export type AuthorizationParams = {
+  redirectUri: string;
+  codeChallenge: string;
+  state?: string | undefined;
+  scopes?: string[] | undefined;
+};
+
+export type OAuthRegisteredClientsStore = {
+  getClient: (clientId: string) => OAuthClientInformationFull | undefined;
+  registerClient: (client: OAuthClientMetadata) => OAuthClientInformationFull;
+};
 
 type PendingAuth = {
   /** Where to send the browser once Reddit comes back. */
@@ -80,7 +95,7 @@ export type RedditOAuthProviderOptions = {
   logger?: Logger;
 };
 
-export class RedditOAuthProvider implements OAuthServerProvider {
+export class RedditOAuthProvider {
   private readonly config: Config;
   private readonly store: TokenStore;
   private readonly issuer: URL;
@@ -130,18 +145,19 @@ export class RedditOAuthProvider implements OAuthServerProvider {
 
   private readonly registeredClients = new Map<string, OAuthClientInformationFull>();
 
+  /**
+   * Returns where to send the browser. Framework-agnostic on purpose: v1 handed
+   * this an express `Response` to call `.redirect()` on, which is the one thing
+   * that made this provider unusable from a web-standard host.
+   */
   async authorize(
     client: OAuthClientInformationFull,
     params: AuthorizationParams,
-    res: Response,
-  ): Promise<void> {
+  ): Promise<string> {
     if (!this.config.clientId) {
-      res.redirect(
-        `${params.redirectUri}?error=server_error&error_description=${encodeURIComponent(
-          "REDDIT_CLIENT_ID is not set on the MCP server",
-        )}`,
-      );
-      return;
+      return `${params.redirectUri}?error=server_error&error_description=${encodeURIComponent(
+        "REDDIT_CLIENT_ID is not set on the MCP server",
+      )}`;
     }
 
     const { verifier, challenge } = createPkcePair();
@@ -157,16 +173,14 @@ export class RedditOAuthProvider implements OAuthServerProvider {
     });
     this.sweep();
 
-    res.redirect(
-      buildAuthorizeUrl({
-        clientId: this.config.clientId,
-        // Our own fixed callback, not the client's — this is the whole point.
-        redirectUri: this.redditRedirectUri,
-        scopes: effectiveScopes(this.config),
-        state: redditState,
-        challenge,
-      }),
-    );
+    return buildAuthorizeUrl({
+      clientId: this.config.clientId,
+      // Our own fixed callback, not the client's — this is the whole point.
+      redirectUri: this.redditRedirectUri,
+      scopes: effectiveScopes(this.config),
+      state: redditState,
+      challenge,
+    });
   }
 
   /**
@@ -243,7 +257,8 @@ export class RedditOAuthProvider implements OAuthServerProvider {
     authorizationCode: string,
   ): Promise<string> {
     const entry = this.codes.get(authorizationCode);
-    if (!entry) throw new Error("Unknown or expired authorization code.");
+    if (!entry)
+      throw new OAuthError(OAuthErrorCode.InvalidGrant, "Unknown or expired authorization code.");
     return entry.clientChallenge;
   }
 
@@ -252,13 +267,17 @@ export class RedditOAuthProvider implements OAuthServerProvider {
     authorizationCode: string,
   ): Promise<OAuthTokens> {
     const entry = this.codes.get(authorizationCode);
-    if (!entry) throw new Error("Unknown or expired authorization code.");
+    if (!entry)
+      throw new OAuthError(OAuthErrorCode.InvalidGrant, "Unknown or expired authorization code.");
     // Single use: an authorization code replayed is an authorization code stolen.
     this.codes.delete(authorizationCode);
     if (entry.clientId !== client.client_id)
-      throw new Error("Authorization code was issued to a different client.");
+      throw new OAuthError(
+        OAuthErrorCode.InvalidGrant,
+        "Authorization code was issued to a different client.",
+      );
     if (Date.now() - entry.createdAt > CODE_TTL_MS)
-      throw new Error("Authorization code has expired.");
+      throw new OAuthError(OAuthErrorCode.InvalidGrant, "Authorization code has expired.");
     return this.issue(client.client_id, entry.scopes);
   }
 
@@ -268,17 +287,22 @@ export class RedditOAuthProvider implements OAuthServerProvider {
     scopes?: string[],
   ): Promise<OAuthTokens> {
     const entry = this.refresh.get(refreshToken);
-    if (!entry) throw new Error("Unknown refresh token.");
+    if (!entry) throw new OAuthError(OAuthErrorCode.InvalidGrant, "Unknown refresh token.");
     this.refresh.delete(refreshToken);
     return this.issue(client.client_id, scopes ?? entry.scopes);
   }
 
   async verifyAccessToken(token: string): Promise<AuthInfo> {
     const entry = this.access.get(token);
-    if (!entry) throw new Error("Invalid access token.");
+    // These must be OAuthError(InvalidToken), not a bare Error: the bearer-auth
+    // helpers classify what they catch, mapping this to 401 with a
+    // WWW-Authenticate challenge. Anything unrecognized becomes a 500, which
+    // tells the client the server is broken rather than that it should
+    // re-authenticate — the bug this replaced.
+    if (!entry) throw new OAuthError(OAuthErrorCode.InvalidToken, "Invalid access token.");
     if (entry.expiresAt <= Date.now()) {
       this.access.delete(token);
-      throw new Error("Access token has expired.");
+      throw new OAuthError(OAuthErrorCode.InvalidToken, "Access token has expired.");
     }
     return {
       token,
