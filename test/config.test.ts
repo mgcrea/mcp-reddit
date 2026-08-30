@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { effectiveScopes, loadConfig, setupInstructions, WRITE_SCOPES } from "../src/config.js";
+import { effectiveScopes, loadConfig, setupInstructions, WRITE_SCOPES } from "#/config";
 
 const base = { REDDIT_TOKEN_PATH: "/nonexistent/tokens.json" };
 

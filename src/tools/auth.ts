@@ -3,10 +3,10 @@ import { execFile } from "node:child_process";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 
-import { buildAuthorizeUrl, createPkcePair, runLoopbackLogin } from "../client/oauth.js";
-import { effectiveScopes, setupInstructions } from "../config.js";
-import type { ToolContext } from "./index.js";
-import { wrap } from "./util.js";
+import { buildAuthorizeUrl, createPkcePair, runLoopbackLogin } from "#/client/oauth";
+import { effectiveScopes, setupInstructions } from "#/config";
+import type { ToolContext } from "#/tools/index";
+import { wrap } from "#/tools/util";
 
 /** Best-effort browser open. A headless box just gets the URL back instead. */
 const openBrowser = (url: string): void => {

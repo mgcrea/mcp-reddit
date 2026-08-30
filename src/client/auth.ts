@@ -1,7 +1,7 @@
-import type { Config } from "../config.js";
-import { effectiveScopes, TOKEN_URL } from "../config.js";
-import { UserContextRequiredError } from "./errors.js";
-import type { TokenStore } from "./tokens.js";
+import { UserContextRequiredError } from "#/client/errors";
+import type { TokenStore } from "#/client/tokens";
+import type { Config } from "#/config";
+import { effectiveScopes, TOKEN_URL } from "#/config";
 
 export type Logger = {
   debug?(...args: unknown[]): void;

@@ -1,15 +1,15 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 
-import type { TokenProvider } from "../client/auth.js";
-import type { RedditClient } from "../client/reddit.js";
-import type { TokenStore } from "../client/tokens.js";
-import type { Config } from "../config.js";
-import { registerAccountTools } from "./account.js";
-import { registerAuthTools } from "./auth.js";
-import { registerBrowseTools } from "./browse.js";
-import { registerRequestTool } from "./request.js";
-import { registerUserTools } from "./users.js";
-import { registerWriteTools } from "./write.js";
+import type { TokenProvider } from "#/client/auth";
+import type { RedditClient } from "#/client/reddit";
+import type { TokenStore } from "#/client/tokens";
+import type { Config } from "#/config";
+import { registerAccountTools } from "#/tools/account";
+import { registerAuthTools } from "#/tools/auth";
+import { registerBrowseTools } from "#/tools/browse";
+import { registerRequestTool } from "#/tools/request";
+import { registerUserTools } from "#/tools/users";
+import { registerWriteTools } from "#/tools/write";
 
 export type ToolContext = {
   config: Config;

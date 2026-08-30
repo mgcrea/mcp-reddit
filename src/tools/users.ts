@@ -1,9 +1,9 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 
-import type { RedditClient } from "../client/reddit.js";
-import { isRecord, summarizeAccount, summarizeListing } from "../client/shape.js";
-import type { ToolContext } from "./index.js";
-import { afterArg, compact, limitArg, sortArg, timeArg, usernameArg, wrap } from "./util.js";
+import type { RedditClient } from "#/client/reddit";
+import { isRecord, summarizeAccount, summarizeListing } from "#/client/shape";
+import type { ToolContext } from "#/tools/index";
+import { afterArg, compact, limitArg, sortArg, timeArg, usernameArg, wrap } from "#/tools/util";
 
 export const registerUserTools = (
   server: McpServer,

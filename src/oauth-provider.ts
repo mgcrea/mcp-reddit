@@ -12,11 +12,11 @@ import type {
 } from "@modelcontextprotocol/sdk/shared/auth.js";
 import type { Response } from "express";
 
-import type { Logger } from "./client/auth.js";
-import { postToken } from "./client/auth.js";
-import { buildAuthorizeUrl, createPkcePair, statesMatch } from "./client/oauth.js";
-import { TOKEN_FILE_VERSION, type TokenStore } from "./client/tokens.js";
-import { effectiveScopes, type Config } from "./config.js";
+import type { Logger } from "#/client/auth";
+import { postToken } from "#/client/auth";
+import { buildAuthorizeUrl, createPkcePair, statesMatch } from "#/client/oauth";
+import { TOKEN_FILE_VERSION, type TokenStore } from "#/client/tokens";
+import { effectiveScopes, type Config } from "#/config";
 
 /**
  * Why this exists rather than the SDK's ProxyOAuthServerProvider.

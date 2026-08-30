@@ -10,11 +10,11 @@ import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/
 import { isInitializeRequest } from "@modelcontextprotocol/sdk/types.js";
 import express from "express";
 
-import { BUILD_INFO } from "./build-info.js";
-import { fileTokenStore } from "./client/tokens.js";
-import { loadConfig } from "./config.js";
-import { RedditOAuthProvider } from "./oauth-provider.js";
-import { createServer } from "./server.js";
+import { BUILD_INFO } from "#/build-info";
+import { fileTokenStore } from "#/client/tokens";
+import { loadConfig } from "#/config";
+import { RedditOAuthProvider } from "#/oauth-provider";
+import { createServer } from "#/server";
 
 /**
  * HTTP (Streamable HTTP) entrypoint. Two reasons to run this rather than the

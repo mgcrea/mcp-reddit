@@ -5,7 +5,7 @@ import {
   RedditApiError,
   UserContextRequiredError,
   WritesDisabledError,
-} from "../client/errors.js";
+} from "#/client/errors";
 
 export type ToolResult = {
   content: { type: "text"; text: string }[];

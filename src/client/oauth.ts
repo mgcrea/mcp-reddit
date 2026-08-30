@@ -1,10 +1,10 @@
 import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
 import { createServer as createHttpServer } from "node:http";
 
-import type { Config } from "../config.js";
-import { AUTHORIZE_URL, effectiveScopes } from "../config.js";
-import { postToken, type Logger, type TokenResponse } from "./auth.js";
-import { TOKEN_FILE_VERSION, type TokenStore } from "./tokens.js";
+import { postToken, type Logger, type TokenResponse } from "#/client/auth";
+import { TOKEN_FILE_VERSION, type TokenStore } from "#/client/tokens";
+import type { Config } from "#/config";
+import { AUTHORIZE_URL, effectiveScopes } from "#/config";
 
 /** An abandoned login must not leave the callback port bound forever. */
 const CALLBACK_TIMEOUT_MS = 180_000;

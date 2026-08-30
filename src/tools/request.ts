@@ -1,10 +1,10 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 
-import { WritesDisabledError } from "../client/errors.js";
-import type { RedditClient } from "../client/reddit.js";
-import type { ToolContext } from "./index.js";
-import { wrap } from "./util.js";
+import { WritesDisabledError } from "#/client/errors";
+import type { RedditClient } from "#/client/reddit";
+import type { ToolContext } from "#/tools/index";
+import { wrap } from "#/tools/util";
 
 /** Reject traversal and absolute URLs, so this cannot be pointed off-host. */
 export const assertSafePath = (path: string): void => {

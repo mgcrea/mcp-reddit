@@ -1,6 +1,6 @@
-import type { AuthContext, Logger, TokenProvider } from "./auth.js";
-import { RedditActionError, RedditApiError } from "./errors.js";
-import { isRecord } from "./shape.js";
+import type { AuthContext, Logger, TokenProvider } from "#/client/auth";
+import { RedditActionError, RedditApiError } from "#/client/errors";
+import { isRecord } from "#/client/shape";
 
 export type Query = Record<string, string | number | boolean | undefined>;
 

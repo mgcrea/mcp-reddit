@@ -1,5 +1,5 @@
-export { createServer, defaultUserAgent, SERVER_NAME, SERVER_VERSION } from "./server.js";
-export type { CreatedServer, CreateServerOptions } from "./server.js";
+export { createServer, defaultUserAgent, SERVER_NAME, SERVER_VERSION } from "#/server";
+export type { CreatedServer, CreateServerOptions } from "#/server";
 export {
   API_BASE,
   AUTHORIZE_URL,
@@ -12,7 +12,7 @@ export {
   TOKEN_URL,
   WRITE_SCOPES,
   type Config,
-} from "./config.js";
+} from "#/config";
 export {
   backoffMs,
   endpointKey,
@@ -22,13 +22,13 @@ export {
   type Query,
   type RateLimit,
   type RedditClientOptions,
-} from "./client/reddit.js";
+} from "#/client/reddit";
 export {
   RedditActionError,
   RedditApiError,
   UserContextRequiredError,
   WritesDisabledError,
-} from "./client/errors.js";
+} from "#/client/errors";
 export {
   basicAuth,
   createTokenProvider,
@@ -36,7 +36,7 @@ export {
   type AuthContext,
   type Logger,
   type TokenProvider,
-} from "./client/auth.js";
+} from "#/client/auth";
 export {
   buildAuthorizeUrl,
   createPkcePair,
@@ -45,14 +45,14 @@ export {
   statesMatch,
   type LoginResult,
   type PkcePair,
-} from "./client/oauth.js";
+} from "#/client/oauth";
 export {
   fileTokenStore,
   memoryTokenStore,
   TOKEN_FILE_VERSION,
   type StoredTokens,
   type TokenStore,
-} from "./client/tokens.js";
+} from "#/client/tokens";
 export {
   KINDS,
   summarizeAccount,
@@ -66,5 +66,5 @@ export {
   toFullname,
   type ShapedComments,
   type ShapedListing,
-} from "./client/shape.js";
-export { registerTools, type ToolContext } from "./tools/index.js";
+} from "#/client/shape";
+export { registerTools, type ToolContext } from "#/tools/index";

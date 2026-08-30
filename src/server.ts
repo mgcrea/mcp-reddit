@@ -1,11 +1,11 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 
-import { BUILD_INFO } from "./build-info.js";
-import { createTokenProvider, type Logger, type TokenProvider } from "./client/auth.js";
-import { RedditClient } from "./client/reddit.js";
-import { fileTokenStore, type TokenStore } from "./client/tokens.js";
-import type { Config } from "./config.js";
-import { registerTools } from "./tools/index.js";
+import { BUILD_INFO } from "#/build-info";
+import { createTokenProvider, type Logger, type TokenProvider } from "#/client/auth";
+import { RedditClient } from "#/client/reddit";
+import { fileTokenStore, type TokenStore } from "#/client/tokens";
+import type { Config } from "#/config";
+import { registerTools } from "#/tools/index";
 
 export const SERVER_NAME = BUILD_INFO.name;
 export const SERVER_VERSION = BUILD_INFO.version;

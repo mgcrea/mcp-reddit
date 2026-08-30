@@ -2,10 +2,10 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { describe, expect, it, vi } from "vitest";
 
-import { staticTokenProvider } from "../src/client/auth.js";
-import { memoryTokenStore, TOKEN_FILE_VERSION } from "../src/client/tokens.js";
-import { loadConfig, type Config } from "../src/config.js";
-import { createServer } from "../src/server.js";
+import { staticTokenProvider } from "#/client/auth";
+import { memoryTokenStore, TOKEN_FILE_VERSION } from "#/client/tokens";
+import { loadConfig, type Config } from "#/config";
+import { createServer } from "#/server";
 
 const jsonResponse = (
   body: unknown,

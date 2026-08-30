@@ -1,10 +1,10 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 
-import type { RedditClient } from "../client/reddit.js";
-import { isRecord, summarizeAccount, summarizeListing } from "../client/shape.js";
-import type { ToolContext } from "./index.js";
-import { afterArg, compact, limitArg, wrap } from "./util.js";
+import type { RedditClient } from "#/client/reddit";
+import { isRecord, summarizeAccount, summarizeListing } from "#/client/shape";
+import type { ToolContext } from "#/tools/index";
+import { afterArg, compact, limitArg, wrap } from "#/tools/util";
 
 /**
  * Everything here needs the signed-in user's own data, so these are registered

@@ -1,11 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  summarizeCommentTree,
-  summarizeListing,
-  summarizeThing,
-  toFullname,
-} from "../src/client/shape.js";
+import { summarizeCommentTree, summarizeListing, summarizeThing, toFullname } from "#/client/shape";
 
 const comment = (id: string, body: string, replies: unknown = "") => ({
   kind: "t1",

@@ -4,10 +4,10 @@ import { join } from "node:path";
 
 import { describe, expect, it, vi } from "vitest";
 
-import { basicAuth, createTokenProvider } from "../src/client/auth.js";
-import { buildAuthorizeUrl, createPkcePair, statesMatch } from "../src/client/oauth.js";
-import { fileTokenStore, memoryTokenStore, TOKEN_FILE_VERSION } from "../src/client/tokens.js";
-import { loadConfig } from "../src/config.js";
+import { basicAuth, createTokenProvider } from "#/client/auth";
+import { buildAuthorizeUrl, createPkcePair, statesMatch } from "#/client/oauth";
+import { fileTokenStore, memoryTokenStore, TOKEN_FILE_VERSION } from "#/client/tokens";
+import { loadConfig } from "#/config";
 
 const base = { REDDIT_TOKEN_PATH: "/nonexistent/tokens.json", REDDIT_CLIENT_ID: "cid" };
 

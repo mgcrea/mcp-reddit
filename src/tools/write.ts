@@ -1,10 +1,10 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 
-import type { RedditClient } from "../client/reddit.js";
-import { isRecord } from "../client/shape.js";
-import type { ToolContext } from "./index.js";
-import { compact, confirmArg, subredditArg, usernameArg, wrap } from "./util.js";
+import type { RedditClient } from "#/client/reddit";
+import { isRecord } from "#/client/shape";
+import type { ToolContext } from "#/tools/index";
+import { compact, confirmArg, subredditArg, usernameArg, wrap } from "#/tools/util";
 
 /**
  * Registered only when REDDIT_ALLOW_WRITES is set AND a user is signed in, so

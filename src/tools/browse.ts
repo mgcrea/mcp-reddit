@@ -1,15 +1,15 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 
-import type { RedditClient } from "../client/reddit.js";
+import type { RedditClient } from "#/client/reddit";
 import {
   summarizeCommentTree,
   summarizeListing,
   summarizeSubreddit,
   toFullname,
   isRecord,
-} from "../client/shape.js";
-import type { ToolContext } from "./index.js";
+} from "#/client/shape";
+import type { ToolContext } from "#/tools/index";
 import {
   afterArg,
   compact,
@@ -19,7 +19,7 @@ import {
   subredditArg,
   timeArg,
   wrap,
-} from "./util.js";
+} from "#/tools/util";
 
 export const registerBrowseTools = (
   server: McpServer,
