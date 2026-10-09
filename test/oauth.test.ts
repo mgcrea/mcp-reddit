@@ -219,14 +219,14 @@ describe("file token store", () => {
   });
 });
 
-describe("RedditOAuthProvider token verification", () => {
-  const provider = (): RedditOAuthProvider =>
-    new RedditOAuthProvider({
-      config: loadConfig({ ...base, REDDIT_HTTP_PORT: "8725" }),
-      store: memoryTokenStore(),
-      issuer: new URL("http://127.0.0.1:8725"),
-    });
+const provider = (): RedditOAuthProvider =>
+  new RedditOAuthProvider({
+    config: loadConfig({ ...base, REDDIT_HTTP_PORT: "8725" }),
+    store: memoryTokenStore(),
+    issuer: new URL("http://127.0.0.1:8725"),
+  });
 
+describe("RedditOAuthProvider token verification", () => {
   /**
    * The bearer-auth helpers classify whatever the verifier throws: an
    * OAuthError(InvalidToken) becomes 401 with a WWW-Authenticate challenge,
